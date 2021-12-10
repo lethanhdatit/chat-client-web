@@ -20,40 +20,43 @@
 <h3>ME: @authenUser.UserName</h3>
 @foreach (var channel in authenUser?.Channels)
 {
-    <div class="container">
-        <div class="row">&nbsp;</div>
-        <div class="row"><h5>@channel.Name</h5></div>
-        <div class="row">
-            <div class="col-2">User</div>
-            <div class="col-4"><span id="userId">@authenUser.Id</span></div>
-            <div class="col-4"><span id="userName">@authenUser.UserName</span></div>
-        </div>
-        <div class="row">
-            <div class="col-2">Message</div>
-            <div class="col-4"><input type="text" id="messageInput" /></div>
-        </div>
-        <div class="row">&nbsp;</div>
-        <div class="row">
-            <div class="col-6">
-                <input type="button" id="sendButton" value="Send Message" />
+    var container_id = $"{authenUser.Id}-{channel.Id}";
+    <div class="chat-container" id="@container_id">
+        <div class="container">
+            <div class="row">&nbsp;</div>
+            <div class="row"><h5>@channel.Name</h5></div>
+            <div class="row">
+                <div class="col-2">User</div>
+                <div class="col-4"><span id="userId">@authenUser.Id</span></div>
+                <div class="col-4"><span id="userName">@authenUser.UserName</span></div>
+            </div>
+            <div class="row">
+                <div class="col-2">Message</div>
+                <div class="col-4"><input type="text" id="messageInput" /></div>
+            </div>
+            <div class="row">&nbsp;</div>
+            <div class="row">
+                <div class="col-6">
+                    <input type="button" id="sendButton" value="Send Message" />
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="row">
-        <div class="col-12">
-            <hr />
+        <div class="row">
+            <div class="col-12">
+                <hr />
+            </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-6">
-            <ul id="messagesList"></ul>
+        <div class="row">
+            <div class="col-6">
+                <ul id="messagesList"></ul>
+            </div>
         </div>
-    </div>
 
-    <div class="row">
-        <div class="col-12">
-            <br />
+        <div class="row">
+            <div class="col-12">
+                <br />
+            </div>
         </div>
     </div>
 }
