@@ -44,6 +44,28 @@ connection.start().then(function () {
 
 
 
+document.getElementById("new-channel-btn").addEventListener("click", async function (event) {
+    var id = document.getElementById("new-channel-id").value;
+    var name = document.getElementById("new-channel-name").value;
+    let data = {
+        Id: Number(id),
+        Name: name
+    };
+    await fetch("/home/NewConnect", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+            //'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: JSON.stringify(data)
+    });
+
+    window.location.replace("/home/index");
+    event.preventDefault();
+}, false);
+
+
+
 
 
 

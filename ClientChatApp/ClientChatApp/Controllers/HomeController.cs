@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,7 +15,14 @@ namespace ClientChatApp.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-
+        private static string LocalDataPath
+        {
+            get
+            {
+                var path = Directory.GetParent(Directory.GetCurrentDirectory()).FullName;
+                return Path.Combine(path, "accounts.json");
+            }
+        }
         public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;
@@ -38,15 +46,15 @@ namespace ClientChatApp.Controllers
         [HttpPost]
         public IActionResult Login(LoginModel login)
         {
-            var accountsTxt = System.IO.File.ReadAllText(@"D:\DAT\ClientChatApp\accounts.json");
+            var accountsTxt = System.IO.File.ReadAllText(LocalDataPath);
             var accounts = JsonConvert.DeserializeObject<List<AccountModel>>(accountsTxt);
 
-            if(login != null
+            if (login != null
             && accounts != null)
             {
                 var matched = accounts.FirstOrDefault(f => f.UserName.Equals(login.UserName, StringComparison.OrdinalIgnoreCase)
                                                         && f.Password == login.Password);
-                if(matched != null)
+                if (matched != null)
                 {
                     var exited = Request.Cookies != null && Request.Cookies.Any(a => a.Key.Equals(Constants.AUTHENTICATED_USER, StringComparison.OrdinalIgnoreCase));
                     if (exited)
@@ -56,8 +64,53 @@ namespace ClientChatApp.Controllers
                     return RedirectToAction("index");
                 }
             }
-
             return View();
+        }
+        [HttpPost]
+        public IActionResult NewConnect([FromBody]ChannelInfo channel)
+        {
+            var exited = Request.Cookies?.FirstOrDefault(a => a.Key.Equals(Constants.AUTHENTICATED_USER, StringComparison.OrdinalIgnoreCase));
+            if (exited == null || exited.Value.Key == null)
+                return RedirectToAction("Login"); 
+            
+            var currentUser = JsonConvert.DeserializeObject<AccountModel>(exited.Value.Value);
+            if (currentUser == null || currentUser.Id <= 0)
+            {
+                Response.Cookies.Delete(Constants.AUTHENTICATED_USER);
+                return RedirectToAction("Login");
+            }
+               
+            if (channel != null)
+            {
+                var accountsTxt = System.IO.File.ReadAllText(LocalDataPath);
+                var accounts = JsonConvert.DeserializeObject<List<AccountModel>>(accountsTxt);
+
+                var matched = accounts.FirstOrDefault(f => f.Id == currentUser.Id);
+                if (matched == null)
+                {
+                    Response.Cookies.Delete(Constants.AUTHENTICATED_USER);
+                    return RedirectToAction("Login");
+                }
+                if (matched.Channels == null)
+                    matched.Channels = new List<ChannelInfo>();
+
+                var matchedChannel = matched.Channels.FirstOrDefault(f => f.Id == channel.Id);
+                if (matchedChannel != null)
+                    matchedChannel.Name = channel.Name ?? matched.UserName;
+                else
+                    matched.Channels.Add(new ChannelInfo
+                    {
+                        Id = channel.Id,
+                        Name = channel.Name
+                    });
+
+                Response.Cookies.Delete(Constants.AUTHENTICATED_USER);
+                Response.Cookies.Append(Constants.AUTHENTICATED_USER, JsonConvert.SerializeObject(matched));
+
+                System.IO.File.WriteAllText(LocalDataPath, JsonConvert.SerializeObject(accounts));
+            }
+
+            return RedirectToAction("index");
         }
         public IActionResult InitMockData()
         {
@@ -145,7 +198,8 @@ namespace ClientChatApp.Controllers
                   }
               }
             });
-            System.IO.File.WriteAllText(@"D:\DAT\ClientChatApp\accounts.json", JsonConvert.SerializeObject(mock));
+
+            System.IO.File.WriteAllText(LocalDataPath, JsonConvert.SerializeObject(mock));
             return Ok();
         }
 

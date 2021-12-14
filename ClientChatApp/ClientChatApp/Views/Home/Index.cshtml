@@ -22,47 +22,63 @@
 <input hidden id="authen-user-channels" value="@channelids" />
 <h3>ME: @authenUser.UserName</h3>
 
-@foreach (var channel in authenUser?.Channels)
-{
-    var container_id = $"{authenUser.Id}-{channel.Id}";
-    <div class="chat-container" data-channel-id="@channel.Id" data-channel-name="@channel.Name" id="@container_id">
-        <div class="container">
-            <div class="row">&nbsp;</div>
-            <div class="row"><h5>@channel.Name (ID @channel.Id)</h5></div>
-            <div class="row">
-                <div class="col-2">User</div>
-                <div class="col-4"><span id="userName">@authenUser.UserName (ID @authenUser.Id)</span></div>
+<div id="main-chat-area">
+    @foreach (var channel in authenUser?.Channels)
+    {
+        var container_id = $"{authenUser.Id}-{channel.Id}";
+        <div class="chat-container" data-channel-id="@channel.Id" data-channel-name="@channel.Name" id="@container_id">
+            <div class="container">
+                <div class="row">&nbsp;</div>
+                <div class="row"><h5>@channel.Name (ID @channel.Id)</h5></div>
+                <div class="row">
+                    <div class="col-2">User</div>
+                    <div class="col-4"><span id="userName">@authenUser.UserName (ID @authenUser.Id)</span></div>
+                </div>
+                <div class="row">
+                    <div class="col-2">Message</div>
+                    <div class="col-4"><input type="text" class="messageInput" /></div>
+                </div>
+                <div class="row">&nbsp;</div>
+                <div class="row">
+                    <div class="col-6">
+                        <input type="button" class="sendButton" value="Send Message" />
+                    </div>
+                </div>
             </div>
+
             <div class="row">
-                <div class="col-2">Message</div>
-                <div class="col-4"><input type="text" class="messageInput" /></div>
+                <div class="col-12">
+                    <hr />
+                </div>
             </div>
-            <div class="row">&nbsp;</div>
             <div class="row">
                 <div class="col-6">
-                    <input type="button" class="sendButton" value="Send Message" />
+                    <ul class="messagesList"></ul>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <br />
                 </div>
             </div>
         </div>
-
-        <div class="row">
-            <div class="col-12">
-                <hr />
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-6">
-                <ul class="messagesList"></ul>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-12">
-                <br />
-            </div>
+    }
+</div>
+<div>
+    <div class="row">
+        <div class="col-2">Channel ID</div>
+        <div class="col-4"><input type="number" name="id" id="new-channel-id" /></div>
+        <div class="col-2">Channel Name</div>
+        <div class="col-4"><input type="text" name="name" id="new-channel-name" /></div>
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="row">
+        <div class="col-6">
+            <input type="button" id="new-channel-btn" value="Connect" />
         </div>
     </div>
-}
+</div>
 <script>
 
 </script>
