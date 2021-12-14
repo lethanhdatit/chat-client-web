@@ -1,37 +1,49 @@
 ﻿"use strict";
 
-const { each } = require("jquery");
-
 var serverEndpoint = document.getElementById("js-hubServiceEndpoint").value;
 var connection = new signalR.HubConnectionBuilder().withUrl(serverEndpoint).build();
 var chatElements = document.getElementsByClassName("chat-container");
-for (var i = 0; i < chatElements.length; i++) {
-    var current = chatElements[i];
-    
-    //Disable send button until connection is established
-    current.getElementById("sendButton").disabled = true;
+var currentUserId = document.getElementById("authen-user-id").value;
+var currentUserName = document.getElementById("authen-user-name").value;
+var currentUserGroupIds = (document.getElementById("authen-user-channels").value).split(',');
 
-    connection.on("ReceiveMessage", function (user, message) {
-        var li = document.createElement("li");
-        current.getElementById("messagesList").appendChild(li);
-        // We can assign user-supplied strings to an element's textContent because it
-        // is not interpreted as markup. If you're assigning in any other way, you 
-        // should be aware of possible script injection concerns.
-        li.textContent = `${user} says ${message}`;
-    });
 
-    connection.start().then(function () {
-        current.getElementById("sendButton").disabled = false;
-    }).catch(function (err) {
-        return console.error(err.toString());
-    });
+document.getElementsByClassName("sendButton").disabled = true;
 
-    current.getElementById("sendButton").addEventListener("click", function (event) {
-        var user = current.getElementById("userName").innerText;
-        var message = current.getElementById("messageInput").value;
-        connection.invoke("SendMessage", user, message).catch(function (err) {
+connection.on("ReceiveGroupMessage", function (userid, username, groupid, groupname, message) {
+    var li = document.createElement("li");
+    li.textContent = `${username} says ${message}`;
+    let container_id = `${currentUserId}-${groupid}`;
+    let container = document.getElementById(container_id);
+    container.getElementsByClassName("messagesList")[0].appendChild(li);
+});
+
+for (var current of chatElements) {
+    let container_id = `${currentUserId}-${current.dataset.channelId}`;
+    let container = document.getElementById(container_id);
+
+    container.getElementsByClassName("sendButton")[0].addEventListener("click", function (event) {
+        var message = container.getElementsByClassName("messageInput")[0].value;
+        connection.invoke("SendMessageToGroup", currentUserId, currentUserName, container.dataset.channelId, container.dataset.channelName, message).catch(function (err) {
             return console.error(err.toString());
         });
         event.preventDefault();
-    });
+    }, false);
 }
+
+connection.start().then(function () {
+    if (currentUserGroupIds) {
+        connection.invoke("AddUserToGroup", currentUserGroupIds).catch(function (err) {
+            return console.error(err.toString());
+        });
+    }
+    document.getElementsByClassName("sendButton").disabled = false;
+}).catch(function (err) {
+    return console.error(err.toString());
+});
+
+
+
+
+
+

@@ -13,31 +13,34 @@
         catch (Exception e) { }
     }
     var hubServiceEndpoint = configuration.GetSection("HubServiceEndpoint").Value;
-
+    var channelids = authenUser.Channels != null ? string.Join(",", authenUser.Channels.Select(s => s.Id.ToString()).ToArray()) : string.Empty;
 }
 
 <input type="text" hidden value="@hubServiceEndpoint" id="js-hubServiceEndpoint" />
+<input hidden id="authen-user-id" value="@authenUser.Id" />
+<input hidden id="authen-user-name" value="@authenUser.UserName" />
+<input hidden id="authen-user-channels" value="@channelids" />
 <h3>ME: @authenUser.UserName</h3>
+
 @foreach (var channel in authenUser?.Channels)
 {
     var container_id = $"{authenUser.Id}-{channel.Id}";
-    <div class="chat-container" id="@container_id">
+    <div class="chat-container" data-channel-id="@channel.Id" data-channel-name="@channel.Name" id="@container_id">
         <div class="container">
             <div class="row">&nbsp;</div>
-            <div class="row"><h5>@channel.Name</h5></div>
+            <div class="row"><h5>@channel.Name (ID @channel.Id)</h5></div>
             <div class="row">
                 <div class="col-2">User</div>
-                <div class="col-4"><span id="userId">@authenUser.Id</span></div>
-                <div class="col-4"><span id="userName">@authenUser.UserName</span></div>
+                <div class="col-4"><span id="userName">@authenUser.UserName (ID @authenUser.Id)</span></div>
             </div>
             <div class="row">
                 <div class="col-2">Message</div>
-                <div class="col-4"><input type="text" id="messageInput" /></div>
+                <div class="col-4"><input type="text" class="messageInput" /></div>
             </div>
             <div class="row">&nbsp;</div>
             <div class="row">
                 <div class="col-6">
-                    <input type="button" id="sendButton" value="Send Message" />
+                    <input type="button" class="sendButton" value="Send Message" />
                 </div>
             </div>
         </div>
@@ -49,7 +52,7 @@
         </div>
         <div class="row">
             <div class="col-6">
-                <ul id="messagesList"></ul>
+                <ul class="messagesList"></ul>
             </div>
         </div>
 
